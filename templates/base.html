@@ -1,0 +1,52 @@
+{#
+# Copyright 2015 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>FoodWiki</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+    	ul li {list-style-type: none; float: left; margin-top: 5px;}
+    	</style>
+  </head>
+  <body>
+    <div class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <div class="navbar-brand"><a href="/">FoodWiki</a></div>
+        </div>
+        <ul class="nav navbar-nav">
+	<li><a href="/upload_food">Upload_Food</a></li>
+	<li><a href="/food_list">Food_list</a></li>
+        <li><form action="/search",method="POST" enctype="multipart/form-data">
+        <ul>
+        <li><input type="text" name="Search_n" id="Search_n" value="{{Search_n}}" class="form-control"/></li>
+         <li><button type="submit" class="btn btn-success">Search</button></li>
+         </ul>
+         </form></li>
+
+         </ul>
+      </div>
+    </div>
+    <div class="container">
+      {% block content %}{% endblock %}
+    </div>
+    {{user}}
+  </body>
+</html>
