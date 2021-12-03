@@ -1,19 +1,23 @@
-from flask import Flask, render_template, json, request, redirect, url_for
+from flask import Flask, render_template, json, request, redirect, url_for, session, escape
 from sqlalchemy import create_engine, text
 from DAOS import DAO
 import random
 from base64 import b64encode
 from PIL import Image
 app = Flask(__name__, static_url_path='/static')
-
+app.secret_key=b'1234abcdefghqwer'
 
 
 @app.route("/")
-def main():
+def index():
 	return render_template('index.html')
 
 @app.route("/upload_food", methods=['GET', 'POST'])
 def upload_food():
+    if 'user_id' not in session:
+        return render_template("Login_first.html")     
+    elif session['user_id']== '':
+        return render_template("Login_first.html")    	
     if request.method == 'POST':
         data = request.form.to_dict(flat=True)
         f = request.files['img'].read()
@@ -26,13 +30,17 @@ def upload_food():
     
 @app.route("/upload_review/<m_id>",methods=['GET', 'POST'])
 def upload_review(m_id):
+    if 'user_id' not in session:
+        return render_template("Login_first.html")  
+    if session['user_id']== '':
+        return render_template("Login_first.html")  
     if request.method == 'POST':
         data = request.form.to_dict(flat=True)
         f = request.files['img'].read()
         if len(f) == 0:
         	f = open("no_image.png", "rb").read()
         	f = bytearray(f)
-        DAO('foodwiki').upload_review(data, f)	
+        DAO('foodwiki').upload_review(data, f, str(session['user_id']))	
         return render_template("upload_done.html")
     return render_template('upload_review.html', m_id = m_id)
 
@@ -59,12 +67,56 @@ def get_food(f_id):
 	else:
 		return render_template("No Search.html") 
 
+@app.route("/login", methods=['POST'])
+def login():
+	id_ = request.form['id']
+	pw_ = request.form['pw']
+	data =  DAO('foodwiki').login(id_, pw_)
+	if(len(data)) == 0:
+		return render_template('login_failed.html')	
+		
+	else:
+		d = data[0]
+		session['user_id'] = d[0]
+		session['nickname'] = d[1]
+		return render_template('index.html')	
+
+@app.route("/login_form")
+def login_1():
+	return render_template('login.html')	
+	
+@app.route("/logout")
+def logout():
+	session.clear()
+	return redirect(url_for('index'))
+
+@app.route("/register", methods=['POST', 'GET'])
+def register():
+    if request.method == 'POST':
+    	data = request.form.to_dict(flat=True)
+
+    	DAO('foodwiki').register(data)
+
+    	return render_template('index.html')
+    return render_template('register.html')
+
 
 @app.route("/search", methods=['GET','POST'])
 def search(m_id = None):  
     data = request.args.get('Search_n')
     f_id =  DAO('foodwiki').get_f_id_by_name(data)
     return redirect(url_for("get_food", f_id=str(f_id[0])))
+
+
+@app.route("/like_click")
+def like():
+    return render_template('Like.html')
+
+@app.route("/dislike_click")
+def dislike():
+    return render_template('Like.html')
+
+
 	    	
 if __name__ == "__main__":
 	app.run(threaded=True, port=3078, host='0.0.0.0')

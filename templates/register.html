@@ -14,22 +14,21 @@
 # limitations under the License.
 #}
 
+{# [START form] #}
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{dic[3]}}</h1>
-  <div class="media-left">
-    <img src="data:image/png;base64, {{img}}" style="float:left; width: 300px;"/>
-  </div>
-  <div class="media-body">
+<h3>{{action}} FOOD Register</h3>
 
-    <h4>{{dic[4]}}</h4>
-    <h4>Rating: {{dic[10]}}</h4>
-        <button onclick="location.href='/like_click'" type="button">Like: {{dic[8]}}</button>
-        <button onclick="location.href='/dislike_click'" type="button">Dislike: {{dic[9]}}</button>
-  </div>
+<form method="POST" enctype="multipart/form-data">
 
+<h3>ID</h3>: <input type='text' name = "id"><br>
+<h3>NICKNAME</h3>: <input type='text' name = "nickname"><br>
+<h3>PW</h3>: <input type='password' name="pw"><br>
+	
 
-
+<button type="submit" class="btn btn-success">Register</button>
+</form>
 
 {% endblock %}
+{# [END form] #}

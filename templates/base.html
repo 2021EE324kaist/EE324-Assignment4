@@ -34,6 +34,14 @@
         <ul class="nav navbar-nav">
 	<li><a href="/upload_food">Upload_Food</a></li>
 	<li><a href="/food_list">Food_list</a></li>
+	<script>
+	if("{{session['user_id']}}" == ""){
+	document.write('<li><a href="/login_form">Login</a></li>');
+	}
+	else{
+	document.write('<li><a href="/logout">Logout</a></li>');
+	}
+        </script>
         <li><form action="/search",method="POST" enctype="multipart/form-data">
         <ul>
         <li><input type="text" name="Search_n" id="Search_n" value="{{Search_n}}" class="form-control"/></li>

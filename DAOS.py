@@ -4,7 +4,15 @@ import datetime
 
 cat = ['한식', '중식', '일식', '양식','분식', '할랄푸드', '패스트푸드', '디저트/카페음료', '기타']
 
-
+def get_table_rows(tb_name):
+		db = pymysql.connect(host='localhost', user='db_user', db='foodwiki', charset='utf8')
+		curs = db.cursor()	
+		sql = 'SELECT COUNT(*) FROM {}'.format(tb_name)
+		curs.execute(sql)
+		res = curs.fetchall()	
+		db.commit()
+		db.close()   
+		return res[0]
 	
 
 
@@ -12,6 +20,30 @@ class DAO:
 	def __init__(self, db):
 		self.db=db
 		pass
+
+	def register(self, data):
+		user_id = get_table_rows('User_tb')[0]
+		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
+		curs = db.cursor()		
+		
+		sql = '''INSERT INTO User_tb(user_id, id, passwd, nickname) VALUES (%s, %s, %s, %s)'''
+		curs.execute(sql, (user_id, data['id'], data['pw'], data['nickname']))
+		db.commit()
+		db.close()
+
+	def login(self, id_, pw):
+		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
+		curs = db.cursor()	
+			
+		sql = "SELECT user_id, nickname FROM User_tb WHERE id='{}' AND passwd='{}'".format(id_, pw)
+		curs.execute(sql)
+		db.commit()
+		db.close()
+		
+		return curs.fetchall()
+		
+			
+			
 	
 	def insert(self, tmp_id):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
@@ -33,8 +65,8 @@ class DAO:
 	def upload_food(self, data, img):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()
-		img_id = "3"
-		menu_id = "3"
+		img_id = user_id = get_table_rows('Img_tb')[0]
+		menu_id = user_id = get_table_rows('Menu_tb')[0]
 		
 		sql_1 = '''INSERT INTO Menu_tb(menu_name, menu_id, img_id, category, description, res_name, price, post_date) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)''' 
 		sql_2 = '''INSERT INTO Img_tb(img_id, img) VALUES (%s, %s)'''
@@ -48,12 +80,11 @@ class DAO:
 		db.commit()
 		db.close()  
 
-	def upload_review(self, data, img):
+	def upload_review(self, data, img, user_id):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()
-		img_id = "6"
-		review_id = "3"
-		user_id = "1"
+		img_id = get_table_rows('Img_tb')[0]
+		review_id = user_id = get_table_rows('Review_tb')[0]
 
 		sql_1 = '''INSERT INTO Review_tb(review_id, user_id, menu_id, title, description,  post_date, img_id, good, bad, rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''' 
 		
@@ -142,7 +173,12 @@ class DAO:
 		db.commit()
 		db.close()       
 		return img, row_s
+
+
+			
+		
      
+
 
 
 
