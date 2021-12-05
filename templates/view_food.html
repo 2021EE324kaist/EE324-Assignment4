@@ -18,7 +18,7 @@
 
 {% block content %}
 
-<h3>{{dic[0]}}</h3>
+<h3>{{dic[1]}}</h3>
 
   <div class="media-left">
     <img src="data:image/png;base64, {{img}}" style="float:left; width: 300px;"/>
@@ -27,13 +27,13 @@
 
     <h4>Category: {{dic[3]}}</h4>
     <h4>Restaurant_name: {{dic[5]}}</h4>
-    <h4>Price:      {{dic[8]}}</h4>
+    <h4>Price:      {{dic[7]}}</h4>
 
   </div>
    <h4>{{dic[4]}}</h4>
 
-<button type="button" onclick="location.href='/get_reviews/{{dic[1]}}'">Review_list</button>
-<button type="button" onclick="location.href='/upload_review/{{dic[1]}}'">Write Review</button>
+<button type="button" onclick="location.href='/get_reviews/{{dic[0]}}'">Review_list</button>
+<button type="button" onclick="location.href='/upload_review/{{dic[0]}}'">Write Review</button>
 
 
 

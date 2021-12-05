@@ -4,13 +4,22 @@ from DAOS import DAO
 import random
 from base64 import b64encode
 from PIL import Image
+import requests
+import util
 app = Flask(__name__, static_url_path='/static')
 app.secret_key=b'1234abcdefghqwer'
 
 
 @app.route("/")
 def index():
-	return render_template('index.html')
+	r = requests.get("http://127.0.0.1:3099/food_ranking")
+	if 'user_id' in session and session['user_id'] != '':	
+		rt = requests.get("http://127.0.0.1:3099/recom/{}".format(session['user_id']))
+		recom = rt.text
+	else:
+		recom = ""
+	r1, r2 = util.decode_rank(r.text)
+	return render_template('index.html', r1=r1, cat=r2[0], r2=r2[1:], recom = recom)
 
 @app.route("/upload_food", methods=['GET', 'POST'])
 def upload_food():
@@ -57,6 +66,8 @@ def get_reviews(m_id):
 @app.route("/review/<r_id>")
 def view_reviews(r_id):
 	img, dic = DAO('foodwiki').get_review(r_id)	
+	session['r_id']=r_id
+	print(r_id)
 	return render_template("view_review.html", img=b64encode(img).decode(), dic=dic)
 
 @app.route("/food/<f_id>")
@@ -79,7 +90,7 @@ def login():
 		d = data[0]
 		session['user_id'] = d[0]
 		session['nickname'] = d[1]
-		return render_template('index.html')	
+		return redirect(url_for("index"))
 
 @app.route("/login_form")
 def login_1():
@@ -95,9 +106,9 @@ def register():
     if request.method == 'POST':
     	data = request.form.to_dict(flat=True)
 
-    	DAO('foodwiki').register(data)
-
-    	return render_template('index.html')
+    	if not DAO('foodwiki').register(data):
+    		return render_template('register_failed.html')
+    	return redirect(url_for('login_1'))
     return render_template('register.html')
 
 
@@ -110,11 +121,23 @@ def search(m_id = None):
 
 @app.route("/like_click")
 def like():
-    return render_template('Like.html')
+    if 'user_id' not in session:
+        return render_template("Login_first.html")     
+    elif session['user_id']== '':
+        return render_template("Login_first.html") 
+    if not DAO('foodwiki').like_up(session['r_id'], session['user_id']):
+    	return render_template('Already.html')
+    return render_template('Success.html')
 
 @app.route("/dislike_click")
 def dislike():
-    return render_template('Like.html')
+    if 'user_id' not in session:
+        return render_template("Login_first.html")     
+    elif session['user_id']== '':
+        return render_template("Login_first.html") 
+    if not DAO('foodwiki').dislike_up(session['r_id'], session['user_id']):
+    	return render_template('Already.html')
+    return render_template('Success.html')
 
 
 	    	

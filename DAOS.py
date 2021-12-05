@@ -1,19 +1,10 @@
 import pymysql
 import time
 import datetime
-
+from util import get_table_rows
 cat = ['한식', '중식', '일식', '양식','분식', '할랄푸드', '패스트푸드', '디저트/카페음료', '기타']
 
-def get_table_rows(tb_name):
-		db = pymysql.connect(host='localhost', user='db_user', db='foodwiki', charset='utf8')
-		curs = db.cursor()	
-		sql = 'SELECT COUNT(*) FROM {}'.format(tb_name)
-		curs.execute(sql)
-		res = curs.fetchall()	
-		db.commit()
-		db.close()   
-		return res[0]
-	
+
 
 
 class DAO:
@@ -26,10 +17,21 @@ class DAO:
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()		
 		
+		sql_0 = 'SELECT COUNT(*) FROM User_tb WHERE id="{}" OR nickname="{}"'.format(data['id'], data['nickname'])
+		print(sql_0)
+		curs.execute(sql_0)
+		res = curs.fetchall()
+		if res[0][0] != 0:
+			return False
+		
+		
+		
 		sql = '''INSERT INTO User_tb(user_id, id, passwd, nickname) VALUES (%s, %s, %s, %s)'''
 		curs.execute(sql, (user_id, data['id'], data['pw'], data['nickname']))
 		db.commit()
 		db.close()
+		
+		return True
 
 	def login(self, id_, pw):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
@@ -42,8 +44,6 @@ class DAO:
 		
 		return curs.fetchall()
 		
-			
-			
 	
 	def insert(self, tmp_id):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
@@ -121,7 +121,6 @@ class DAO:
 			return None, None
 		row_s = list(res[0])
 		img_id = row_s[2]
-		print(row_s[3])
 		row_s[3] = cat[int(row_s[3])]
 		curs.execute(sql_2, (img_id))
 		res_2 = curs.fetchall()
@@ -136,12 +135,18 @@ class DAO:
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()
 		
-		sql = '''SELECT review_id, title, good, bad FROM Review_tb WHERE menu_id=(%s)'''
-		curs.execute(sql, (menu_id))
-		res = curs.fetchall()
+		sql_1 = '''SELECT review_id, title, good, bad FROM Review_tb WHERE menu_id=(%s) AND is_bad=0'''		
+		curs.execute(sql_1, (menu_id))
+		res_1 = curs.fetchall()
+		sql_2= '''SELECT review_id, title, good, bad FROM Review_tb WHERE menu_id=(%s) AND is_bad=1'''		
+		curs.execute(sql_2, (menu_id))
+		res_2 = curs.fetchall()		
+		
+		
+		
 		db.commit()
 		db.close()
-		return res
+		return list(res_1) + list(res_2)
 
 	def get_food_list(self):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
@@ -164,7 +169,7 @@ class DAO:
 		curs.execute(sql_1, (r_id))
 		res = curs.fetchall()
 		row_s = list(res[0])
-		img_id = row_s[7]
+		img_id = row_s[6]
 		curs.execute(sql_2, (img_id))
 		res_2 = curs.fetchall()
 		for row in res_2:
@@ -174,8 +179,108 @@ class DAO:
 		db.close()       
 		return img, row_s
 
+	
+	def is_evaluated(self, r_id, u_id):
+		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
+		curs = db.cursor()
+		sql = '''SELECT like_list FROM User_tb WHERE user_id=(%s)'''
+		curs.execute(sql, (u_id))
+		res = curs.fetchall()
+		tmp = res[0]
+		tmp = tmp[0]
+		if tmp is not None:
+			r_ls = tmp.split('_')
+			if str(r_id) in r_ls:
+				return True
+		
+		sql_2 = '''SELECT dislike_list FROM User_tb WHERE user_id=(%s)'''
+		curs.execute(sql_2, (u_id))
+		res = curs.fetchall()
+		tmp = res[0]
+		tmp = tmp[0]
+		db.commit()
+		db.close() 
+		if tmp is None:
+			return False
+		else:
+			r_ls = tmp.split('_')
+			if str(r_id) in r_ls:
+				return True
+			return False
 
 			
+
+
+	def like_up(self, r_id, u_id):
+		if self.is_evaluated(r_id, u_id):
+			return False
+		print(r_id, u_id)
+		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
+		curs = db.cursor()
+		
+		sql_1 = '''SELECT good FROM Review_tb WHERE review_id=(%s)'''
+		curs.execute(sql_1, (r_id))
+		res = curs.fetchall()
+		tmp = res[0]
+		like_cnt = tmp[0]
+		like_cnt+=1
+		
+		sql_2 = '''SELECT like_list FROM User_tb WHERE user_id=(%s)'''
+		curs.execute(sql_2, (u_id))
+		res = curs.fetchall()
+		tmp = res[0]
+		r_ls = tmp[0]
+		if r_ls is None:
+			r_ls = ""
+		r_ls = r_ls +  r_id + "_" 
+		
+		sql_3 = 'Update Review_tb SET good={} WHERE review_id={}'.format(like_cnt, r_id)
+		curs.execute(sql_3)
+		
+		sql_4 = 'Update User_tb SET like_list="{}" WHERE user_id={}'.format(r_ls, u_id)
+		curs.execute(sql_4)
+		db.commit()
+		db.close()  
+		
+		return True
+
+	def dislike_up(self, r_id, u_id):
+		if self.is_evaluated(r_id, u_id):
+			return False
+		
+		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
+		curs = db.cursor()
+		
+		sql_1 = '''SELECT bad FROM Review_tb WHERE review_id=(%s)'''
+		curs.execute(sql_1, (r_id))
+		res = curs.fetchall()
+		tmp = res[0]
+		like_cnt = tmp[0]
+		like_cnt+=1
+		
+		sql_2 = '''SELECT dislike_list FROM User_tb WHERE user_id=(%s)'''
+		curs.execute(sql_2, (u_id))
+		res = curs.fetchall()
+		tmp = res[0]
+		r_ls = tmp[0]
+		if r_ls is None:
+			r_ls = ""
+		r_ls = r_ls +  r_id + "_" 
+		
+		
+		sql_3 = 'Update Review_tb SET bad={} WHERE review_id={}'.format(like_cnt, r_id)
+		curs.execute(sql_3)
+		
+		sql_4 = 'Update User_tb SET dislike_list="{}" WHERE user_id={}'.format(r_ls_2, u_id)
+		curs.execute(sql_4)
+		db.commit()
+		db.close()  
+		
+		return True
+
+
+
+						
 		
      
 

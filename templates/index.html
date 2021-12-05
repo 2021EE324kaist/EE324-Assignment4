@@ -14,11 +14,29 @@
 # limitations under the License.
 #}
 
+
+
 {% extends "base.html" %}
+
 
 {% block content %}
 
 <h2>Welcome to FoodWiki!!</h2>
+<h3>Food Ranking</h3>
+{% for rank in r1 %}
+<h4><a href="/food/{{rank[0]}}">{{rank[1]}}</a></h4>
+
+{% endfor %}
+<h3>{{cat}} Ranking</h3>
+{% for rank in r2 %}
+<h4><a href="/food/{{rank[0]}}">{{rank[1]}}</a></h4>
+{% endfor %}
+	<script>
+	if("{{session['user_id']}}" != ""){
+	document.write('<h3><a href="/food/{{recom}}">Daily Specials!</a></h3>');
+	}
+        </script>
+
 
 
 {% endblock %}
