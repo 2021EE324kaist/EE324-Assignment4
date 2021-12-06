@@ -1,5 +1,5 @@
 import pymysql
-
+from base64 import b64encode
 cat = ['한식', '중식', '일식', '양식','분식', '할랄푸드', '패스트푸드', '디저트/카페음료', '기타']
 
 def get_table_rows(tb_name):
@@ -52,6 +52,9 @@ def overlap_ls(A, B):
 
 
 def decode_rank(data):
+	db = pymysql.connect(host='localhost', user='db_user', db='foodwiki', charset='utf8')
+	curs = db.cursor()
+
 	div = data.split("@")
 	all_rank = div[0]
 	cat_num = div[1]
@@ -62,22 +65,64 @@ def decode_rank(data):
 	all_div = all_rank.split('/')
 	all_div.pop()
 	cnt = 0
+	img_ls = []
 	for comp in all_div:
 		tup = comp.split('_')
 		all_res.append((tup[0], tup[1]))
+		img_ls.append(tup[2])
 		cnt+=1
 		if cnt>4:
-			break		
+			break	
+	
+	id_ls = ""
+	id_ls += "img_id={}".format(img_ls[0])
+	del img_ls[0]
+	for i_id in img_ls:
+		id_ls += " OR img_id={}".format(i_id)
+	
+	sql_1 = 'SELECT img FROM Img_tb WHERE ' + id_ls
+	curs.execute(sql_1)
+	res_1 = curs.fetchall()
+	
+	all_rank = []
+	
+	for j in range(len(all_res)):
+		all_rank.append((all_res[j][0], all_res[j][1], b64encode(res_1[j][0]).decode()))
+			
+	
 	#cat
 	cat_res = []
-	cat_res.append(cat[int(cat_num)])
-	cat_div = cat_rank.split('/')
-	cat_div.pop()
-	cnt = 0
-	for comp in cat_div:
-		tup = comp.split('_')
-		cat_res.append((tup[0], tup[1]))
-		cnt+=1
-		if cnt>2:
-			break
-	return all_res, cat_res
+	cat_name = cat[int(cat_num)]
+	if len(cat_rank) != 0:
+		cat_div = cat_rank.split('/')
+		cat_div.pop()
+		cnt = 0
+		img_ls = []
+		cat_tmp = []
+		for comp in cat_div:
+			tup = comp.split('_')
+			cat_res.append((tup[0], tup[1]))
+			img_ls.append(tup[2])
+			cnt+=1
+			if cnt>2:
+				break
+		id_ls = ""
+		id_ls += "img_id={}".format(img_ls[0])
+		del img_ls[0]
+		for i_id in img_ls:
+			id_ls += " OR img_id={}".format(i_id)
+		
+		sql_2 = 'SELECT img FROM Img_tb WHERE ' + id_ls
+		curs.execute(sql_2)
+		res_2 = curs.fetchall()
+		
+		cat_rank = []
+		
+		for j in range(len(cat_res)):
+			cat_rank.append((cat_res[j][0], cat_res[j][1], b64encode(res_2[j][0]).decode()))						
+	else:
+		cat_rank = []		
+			
+	db.close()			
+			
+	return all_rank, cat_name, cat_rank

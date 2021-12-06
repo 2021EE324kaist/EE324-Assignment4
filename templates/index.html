@@ -21,22 +21,43 @@
 
 {% block content %}
 
-<h2>Welcome to FoodWiki!!</h2>
-<h3>Food Ranking</h3>
-{% for rank in r1 %}
-<h4><a href="/food/{{rank[0]}}">{{rank[1]}}</a></h4>
+<h1 class="center welc" style="font-weight: bold;">Welcome to <span class="hanna fontb">FoodWiki</span>!!</h1>
 
-{% endfor %}
-<h3>{{cat}} Ranking</h3>
-{% for rank in r2 %}
-<h4><a href="/food/{{rank[0]}}">{{rank[1]}}</a></h4>
-{% endfor %}
-	<script>
+<div class="container" style="overflow:auto; margin-botton:30px;">
+	<div class="divleft" style="padding-right:40px; margin-botton:40px;">
+		<h3 class="center lato" style="margin-bottom:30px;">Food Ranking</h3>
+		{% for rank in r1 %}
+    <div class="media cntnt">
+  	<a href="/food/{{rank[0]}}">
+    <img src="data:image/png;base64, {{rank[2]}}" style="float: left; height: 100px; width: 140px; object-fit: cover; margin-right: 20px;"/>
+   	<p class="thutitle hanna">{{rank[1]}}</p></a>
+		</div>
+		{% endfor %}
+
+	</div>
+	<div class="divright">
+		<script>
+		if("{{cat}}" != ""){
+		document.write('<h3 class="center lato" style="margin-bottom:30px;">{{cat}}  Ranking</h3>')
+		}
+		</script>
+		{% for rank in r2 %}
+    <div class="media cntnt">
+  		<a href="/food/{{rank[0]}}">
+     	<img src="data:image/png;base64, {{rank[2]}}" style="float: left; height: 100px; width: 140px; object-fit: cover; margin-right: 20px;"/>
+   		<p class="thutitle hanna">{{rank[1]}}</p></a>
+		</div>
+		{% endfor %}
+
+
+<script>
 	if("{{session['user_id']}}" != ""){
-	document.write('<h3><a href="/food/{{recom}}">Daily Specials!</a></h3>');
+	document.write('<h3 class="center lato" style="margin-bottom:30px;">Recommendation</h3><div class="media cntnt"><a href="/food/{{recom}}"><img src="{{ url_for("static", filename="Images/Recommend.jpeg") }}" style="float: left; height: 100px; width: 100px; object-fit: cover; margin-right: 20px;"/><p class="thutitle hanna">For You!</p></a></div>');
 	}
-        </script>
+	</script>
+	
+	</div>	
 
-
-
+	
+</div>
 {% endblock %}

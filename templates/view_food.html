@@ -18,22 +18,21 @@
 
 {% block content %}
 
-<h3>{{dic[1]}}</h3>
+<p class="lato fn">{{dic[1]}}</p>
 
   <div class="media-left">
     <img src="data:image/png;base64, {{img}}" style="float:left; width: 300px;"/>
   </div>
-  <div class="media-body">
+  <div class="media-body" style="margin-left:20px;">
 
-    <h4>Category: {{dic[3]}}</h4>
-    <h4>Restaurant_name: {{dic[5]}}</h4>
-    <h4>Price:      {{dic[7]}}</h4>
+    <h3 class="lato fi">Category :  {{dic[3]}}</h3>
+    <h3 class="lato fi">Restaurant :  {{dic[5]}}</h3>
+    <h3 class="lato fi">Price :       {{dic[7]}}</h3>
 
   </div>
-   <h4>{{dic[4]}}</h4>
-
-<button type="button" onclick="location.href='/get_reviews/{{dic[0]}}'">Review_list</button>
-<button type="button" onclick="location.href='/upload_review/{{dic[0]}}'">Write Review</button>
+  <div class="foodinfo">{{dic[4]}}</div>
+  <div class="col-md-3 col-sm-3 col-xs-6"> <a href="/get_reviews/{{dic[0]}}" class="btn btn-sm animated-button victoria-four">Review List</a> </div>
+  <div class="col-md-3 col-sm-3 col-xs-6"> <a href="/upload_review/{{dic[0]}}" class="btn btn-sm animated-button victoria-four">Write Review</a> </div>
 
 
 

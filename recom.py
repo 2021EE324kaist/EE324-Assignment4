@@ -99,7 +99,7 @@ def food_ranking():
 	db = pymysql.connect(host='localhost', user='man1', db='foodwiki', charset='utf8')
 	curs = db.cursor()	
 	#all date
-	sql = 'SELECT menu_id, menu_name FROM Menu_tb NATURAL JOIN  (SELECT menu_id FROM Review_tb Group by menu_id HAVING COUNT(*)>3 ORDER BY AVG(rating) DESC) as A'
+	sql = 'SELECT menu_id, menu_name, img_id FROM Menu_tb NATURAL JOIN  (SELECT menu_id FROM Review_tb Group by menu_id HAVING COUNT(*)>3 ORDER BY AVG(rating) DESC) as A '
 
 	curs.execute(sql)
 	res = curs.fetchall()
@@ -107,20 +107,19 @@ def food_ranking():
 	cat = random.randint(0, 8)
 	
 	#category
-	sql_1 = 'SELECT menu_id, menu_name FROM Menu_tb NATURAL JOIN  (SELECT menu_id FROM Review_tb Group by menu_id HAVING COUNT(*)>3 ORDER BY AVG(rating) DESC) as A WHERE category={}'.format(cat)
+	sql_1 = 'SELECT menu_id, menu_name, img_id FROM Menu_tb NATURAL JOIN  (SELECT menu_id FROM Review_tb Group by menu_id HAVING COUNT(*)>3 ORDER BY AVG(rating) DESC) as A WHERE category={}'.format(cat)
 
 
 	curs.execute(sql_1)
 	res_1 = curs.fetchall()
 	
-	resp = ""
-	
+	resp = ""	
 	for comp in res:
-		tmp = str(comp[0]) + "_" + str(comp[1]) + "/"
+		tmp = str(comp[0]) + "_" + str(comp[1]) + "_" + str(comp[2]) + "/"
 		resp+=tmp
 	resp += "@" + str(cat) + "@"
 	for comp in res_1:
-		tmp = str(comp[0]) + "_" + str(comp[1]) + "/"
+		tmp = str(comp[0]) + "_" + str(comp[1]) + "_" + str(comp[2]) + "/"
 		resp+=tmp
 
 

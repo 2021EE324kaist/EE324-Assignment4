@@ -18,15 +18,18 @@ def index():
 		recom = rt.text
 	else:
 		recom = ""
-	r1, r2 = util.decode_rank(r.text)
-	return render_template('index.html', r1=r1, cat=r2[0], r2=r2[1:], recom = recom)
+	r1, cat, r2 = util.decode_rank(r.text)
+	if len(r2) == 0:
+		return render_template('index.html', r1=r1, cat="", r2=[], recom = recom)		
+	else:
+		return render_template('index.html', r1=r1, cat=cat, r2=r2, recom = recom)
 
 @app.route("/upload_food", methods=['GET', 'POST'])
 def upload_food():
     if 'user_id' not in session:
-        return render_template("Login_first.html")     
+    	return render_template("alert_link.html", msg="Please login first", link="/login_form")  
     elif session['user_id']== '':
-        return render_template("Login_first.html")    	
+    	return render_template("alert_link.html", msg="Please login first", link="/login_form")   	
     if request.method == 'POST':
         data = request.form.to_dict(flat=True)
         f = request.files['img'].read()
@@ -40,9 +43,12 @@ def upload_food():
 @app.route("/upload_review/<m_id>",methods=['GET', 'POST'])
 def upload_review(m_id):
     if 'user_id' not in session:
-        return render_template("Login_first.html")  
+    	return render_template("alert_link.html", msg="Please login first", link="/login_form")   
     if session['user_id']== '':
-        return render_template("Login_first.html")  
+    	return render_template("alert_link.html", msg="Please login first", link="/login_form")  
+    if DAO('foodwiki').is_reviewed(session['user_id'], m_id):
+    	return render_template("alert.html",msg = "You have already reviewed this menu!!")
+    
     if request.method == 'POST':
         data = request.form.to_dict(flat=True)
         f = request.files['img'].read()
@@ -67,16 +73,21 @@ def get_reviews(m_id):
 def view_reviews(r_id):
 	img, dic = DAO('foodwiki').get_review(r_id)	
 	session['r_id']=r_id
-	print(r_id)
 	return render_template("view_review.html", img=b64encode(img).decode(), dic=dic)
+
+@app.route("/Remove")
+def remove():
+	DAO('foodwiki').remove(session['r_id'])
+	return render_template('alert_link.html', msg='Register sucessfully!!', link = '/food/{}'.format(session['f_id']))
 
 @app.route("/food/<f_id>")
 def get_food(f_id):
 	ret, dic = DAO('foodwiki').get_food(f_id) 
 	if ret is not None:
+		session['f_id'] = dic[0]
 		return render_template("view_food.html", output='1557', img = b64encode(ret).decode(), dic = dic)
 	else:
-		return render_template("No Search.html") 
+    		return render_template('alert.html', msg='No result found')
 
 @app.route("/login", methods=['POST'])
 def login():
@@ -84,7 +95,7 @@ def login():
 	pw_ = request.form['pw']
 	data =  DAO('foodwiki').login(id_, pw_)
 	if(len(data)) == 0:
-		return render_template('login_failed.html')	
+		return render_template('alert.html', msg="Login Failed. (Wrong ID or Password)")	
 		
 	else:
 		d = data[0]
@@ -107,8 +118,8 @@ def register():
     	data = request.form.to_dict(flat=True)
 
     	if not DAO('foodwiki').register(data):
-    		return render_template('register_failed.html')
-    	return redirect(url_for('login_1'))
+    		return render_template('alert.html', msg='ID or Nickname is duplicated!!')
+    	return render_template('alert_link.html', msg='Register sucessfully!!', link = "/login_form")
     return render_template('register.html')
 
 
@@ -116,28 +127,31 @@ def register():
 def search(m_id = None):  
     data = request.args.get('Search_n')
     f_id =  DAO('foodwiki').get_f_id_by_name(data)
-    return redirect(url_for("get_food", f_id=str(f_id[0])))
+    if f_id == None:
+    	return render_template('alert.html', msg='No result found')
+    else:
+    	return redirect(url_for("get_food", f_id=str(f_id[0])))
 
 
 @app.route("/like_click")
 def like():
     if 'user_id' not in session:
-        return render_template("Login_first.html")     
+    	return render_template("alert_link.html", msg="Please login first", link="/login_form")     
     elif session['user_id']== '':
-        return render_template("Login_first.html") 
+    	return render_template("alert_link.html", msg="Please login first", link="/login_form")  
     if not DAO('foodwiki').like_up(session['r_id'], session['user_id']):
-    	return render_template('Already.html')
-    return render_template('Success.html')
+    	return render_template('alert.html', msg= "You have already evaluated this review!!")
+    return render_template('alert.html', msg="Success!!")
 
 @app.route("/dislike_click")
 def dislike():
     if 'user_id' not in session:
-        return render_template("Login_first.html")     
+    	return render_template("alert_link.html", msg="Please login first", link="/login_form")      
     elif session['user_id']== '':
-        return render_template("Login_first.html") 
+    	return render_template("alert_link.html", msg="Please login first", link="/login_form")  
     if not DAO('foodwiki').dislike_up(session['r_id'], session['user_id']):
-    	return render_template('Already.html')
-    return render_template('Success.html')
+    	return render_template('alert.html', msg= "You have already evaluated this review!!")
+    return render_template('alert.html', msg="Success!!")
 
 
 	    	

@@ -20,13 +20,15 @@
 
 
 {% for review in reviews %}
-<div class="media">
+<div class="media cntnt">
   <a href="/review/{{review[0]}}">
-	<h4>{{review[1]}}</h4>	</a><h4>Like: {{review[2]}}</h4><h4>Dislike: {{review[3]}}</h4>
+  	<img src="data:image/png;base64, {{review[4]}}" style="float: left; height: 100px; width: 140px; object-fit: cover; margin-right: 20px;"/>
+  	
+	<h4 class="hanna">{{review[1]}}</h4>	</a><h4>Like: {{review[2]}}</h4><h4>Dislike: {{review[3]}}</h4>
 
 </div>
 {% else %}
-<p>No Reviews found</p>
+	<h2 class="lato">No Reviews!!</h2>
 {% endfor %}
 
 

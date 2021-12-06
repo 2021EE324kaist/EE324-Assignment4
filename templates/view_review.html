@@ -17,18 +17,29 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>{{dic[3]}}</h1>
+
+  
+<p class="lato fn">{{dic[3]}}</p>
   <div class="media-left">
     <img src="data:image/png;base64, {{img}}" style="float:left; width: 300px;"/>
   </div>
-  <div class="media-body">
+  <div class="media-body" style="margin-left:20px;">
 
-    <p>{{dic[4]}}</p>
-    <h4>Rating: {{dic[9]}}</h4>
-        <button onclick="location.href='/like_click'" type="button">Like: {{dic[7]}}</button>
-        <button onclick="location.href='/dislike_click'" type="button">Dislike: {{dic[8]}}</button>
+    <h4 class="lato fi">{{dic[4]}}</h4>
+    <h4 class="lato fi">Rating : {{dic[9]}}</h4>
+     
+
+<div class="col-md-3 col-sm-3 col-xs-6"> <a href="/like_click" class="btn btn-sm animated-button victoria-four">LIKE : {{dic[7]}}</a> </div>
+<div class="col-md-3 col-sm-3 col-xs-6"> <a href="/dislike_click" class="btn btn-sm animated-button victoria-four">DISLIKE : {{dic[8]}}</a> </div>
+<script>
+	if("{{session['user_id']}}" == "{{dic[2]}}"){
+	document.write('<div class="col-md-3 col-sm-3 col-xs-6"><a href="/Remove" class="btn btn-sm animated-button victoria-four">Remove</a></div>');
+	}
+</script>
+
+
+
   </div>
-
 
 
 

@@ -2,6 +2,7 @@ import pymysql
 import time
 import datetime
 from util import get_table_rows
+from base64 import b64encode
 cat = ['한식', '중식', '일식', '양식','분식', '할랄푸드', '패스트푸드', '디저트/카페음료', '기타']
 
 
@@ -18,14 +19,11 @@ class DAO:
 		curs = db.cursor()		
 		
 		sql_0 = 'SELECT COUNT(*) FROM User_tb WHERE id="{}" OR nickname="{}"'.format(data['id'], data['nickname'])
-		print(sql_0)
 		curs.execute(sql_0)
 		res = curs.fetchall()
 		if res[0][0] != 0:
 			return False
-		
-		
-		
+				
 		sql = '''INSERT INTO User_tb(user_id, id, passwd, nickname) VALUES (%s, %s, %s, %s)'''
 		curs.execute(sql, (user_id, data['id'], data['pw'], data['nickname']))
 		db.commit()
@@ -80,12 +78,24 @@ class DAO:
 		db.commit()
 		db.close()  
 
+	def is_reviewed(self, user_id, menu_id):
+		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
+		curs = db.cursor()
+		sql = "SELECT COUNT(*) FROM Review_tb WHERE user_id='{}' AND menu_id='{}'".format(user_id, menu_id)
+		curs.execute(sql)
+		res = curs.fetchall()
+		if res[0][0]!=0:
+			return True
+		return False
+		
+		
+		
+
 	def upload_review(self, data, img, user_id):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()
 		img_id = get_table_rows('Img_tb')[0]
-		review_id = user_id = get_table_rows('Review_tb')[0]
-
+		review_id = get_table_rows('Review_tb')[0]
 		sql_1 = '''INSERT INTO Review_tb(review_id, user_id, menu_id, title, description,  post_date, img_id, good, bad, rating) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)''' 
 		
 		sql_2 = '''INSERT INTO Img_tb(img_id, img) VALUES (%s, %s)'''
@@ -135,30 +145,46 @@ class DAO:
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()
 		
-		sql_1 = '''SELECT review_id, title, good, bad FROM Review_tb WHERE menu_id=(%s) AND is_bad=0'''		
+		sql_1 = '''SELECT review_id, title, good, bad , img FROM Review_tb NATURAL JOIN Img_tb WHERE menu_id=(%s) AND is_bad=0'''		
 		curs.execute(sql_1, (menu_id))
 		res_1 = curs.fetchall()
-		sql_2= '''SELECT review_id, title, good, bad FROM Review_tb WHERE menu_id=(%s) AND is_bad=1'''		
+		sql_2= '''SELECT review_id, title, good, bad , img FROM Review_tb NATURAL JOIN Img_tb WHERE menu_id=(%s) AND is_bad=1'''		
 		curs.execute(sql_2, (menu_id))
 		res_2 = curs.fetchall()		
+		
+		r1 = list(res_1)
+		r1.reverse()
+		r2 = list(res_2)
+		r2.reverse()
+		
+		res_t = r1+r2
+		res_ls = []
+		for row in res_t:
+			res_ls.append([row[0], row[1], row[2], row[3], b64encode(row[4]).decode()])	
 		
 		
 		
 		db.commit()
 		db.close()
-		return list(res_1) + list(res_2)
+		return res_ls
 
 	def get_food_list(self):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()
 		
-		sql = '''SELECT menu_name, menu_id FROM Menu_tb'''
+		sql = '''SELECT menu_name, menu_id, img FROM Menu_tb NATURAL JOIN Img_tb'''
 		curs.execute(sql)
 		res = curs.fetchall()
+		
+		res_ls = []
+		for row in res:
+			res_ls.append([row[0], row[1], b64encode(row[2]).decode()])
 		db.commit()
 		db.close()
-		return res
+		return res_ls
 
+	
+	
 		
 	def get_review(self, r_id):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
@@ -179,7 +205,14 @@ class DAO:
 		db.close()       
 		return img, row_s
 
-	
+	def remove(self, r_id):
+		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
+		curs = db.cursor()
+		sql = "DELETE FROM Review_tb WHERE review_id='{}'".format(r_id)
+		curs.execute(sql)
+		db.commit()
+		db.close()		
+			
 	def is_evaluated(self, r_id, u_id):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()
@@ -214,7 +247,6 @@ class DAO:
 	def like_up(self, r_id, u_id):
 		if self.is_evaluated(r_id, u_id):
 			return False
-		print(r_id, u_id)
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
 		curs = db.cursor()
 		

@@ -16,43 +16,54 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-
+    <link href="static/favicon.ico" rel="icon" type="image/x-icon" />
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <title>FoodWiki</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">  
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <style>
-    	ul li {list-style-type: none; float: left; margin-top: 5px;}
-    	</style>
+       ul li {list-style-type: none; float: left; margin-top: 0px;}
+       </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
   </head>
   <body>
-    <div class="navbar navbar-default">
+    <div class="navbar navbar-fixed-top">
       <div class="container">
-        <div class="navbar-header">
-          <div class="navbar-brand"><a href="/">FoodWiki</a></div>
-        </div>
         <ul class="nav navbar-nav">
-	<li><a href="/upload_food">Upload_Food</a></li>
-	<li><a href="/food_list">Food_list</a></li>
-	<script>
-	if("{{session['user_id']}}" == ""){
-	document.write('<li><a href="/login_form">Login</a></li>');
-	}
-	else{
-	document.write('<li><a href="/logout">Logout</a></li>');
-	}
+        <li><a href="/" class="tbtn brd hanna">Food Wiki</a></li>
+   <li><a href="/upload_food" class="tbtn bd">Upload Food</a> </li>
+   <li><a href="/food_list" class="tbtn bd">Food list</a></li>
+   <script>
+   if("{{session['user_id']}}" == ""){
+   document.write('<li><a href="/login_form" class="tbtn bd">Login</a></li>');
+   }
+   else{
+   document.write('<li><a href="/logout" class="tbtn bd">Logout</a></li>');
+   }
         </script>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
         <li><form action="/search",method="POST" enctype="multipart/form-data">
-        <ul>
+        <ul style="margin-top:8px;">
         <li><input type="text" name="Search_n" id="Search_n" value="{{Search_n}}" class="form-control"/></li>
-         <li><button type="submit" class="btn btn-success">Search</button></li>
+         <li><button type="submit" id="bb" class="btn btn-success">Search</button></li>
          </ul>
          </form></li>
 
          </ul>
       </div>
     </div>
-    <div class="container">
+    <div class="container" style="margin-top: 80px;">
       {% block content %}{% endblock %}
     </div>
+    
+    <footer class="footer">
+    <div class="center lato brd" style="color:#fff; font-size:24px;">© FoodWiki Inc.</div>
+    </footer>
+    
+    
+    
   </body>
 </html>

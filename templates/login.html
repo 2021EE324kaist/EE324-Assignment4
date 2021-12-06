@@ -14,24 +14,40 @@
 # limitations under the License.
 #}
 
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <title>FoodWiki</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+    	ul li {list-style-type: none; float: left; margin-top: 0px;}
+    	</style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 
-{% block content %}
+  </head>
 
-<body>
-<form method="post" action="/login">
-	<h3>ID</h3>: <input type='text' name = "id"><br>
-	<h3>PW</h3>: <input type='password' name="pw"><br>
-	
-	<input type="submit" value='Login'>
-</form>
+<body class="lglg">
 
-<a href="/register">Register</a>
+
+    <form action="/login" method="post" class="loginform">
+      <h2>Login</h2>
+      <div class="ipform">
+        <input type="text" class="iptxt" name="id" placeholder="ID">
+      </div>
+      <div class="ipform">
+        <input type="password" class="iptxt" name="pw" placeholder="PW">
+      </div>
+      <button type="submit" class="loginbtn">
+        LOG IN
+      </button>
+      <div style="text-align: center;">
+        Don't you have an account? <a href="/register">sign up</a>
+      </div>
+    </form>
 
 
 </body>
-
-
-
-
-{% endblock %}
+</html>
