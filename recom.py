@@ -99,7 +99,7 @@ def food_ranking():
 	db = pymysql.connect(host='localhost', user='man1', db='foodwiki', charset='utf8')
 	curs = db.cursor()	
 	#all date
-	sql = 'SELECT menu_id, menu_name, img_id FROM Menu_tb NATURAL JOIN  (SELECT menu_id FROM Review_tb Group by menu_id HAVING COUNT(*)>3 ORDER BY AVG(rating) DESC) as A '
+	sql = 'SELECT menu_id, menu_name, img_id FROM Menu_tb NATURAL JOIN  (SELECT menu_id, AVG(rating) as avg FROM Review_tb Group by menu_id HAVING COUNT(*)>3) as A ORDER BY avg DESC'
 
 	curs.execute(sql)
 	res = curs.fetchall()
@@ -107,7 +107,7 @@ def food_ranking():
 	cat = random.randint(0, 8)
 	
 	#category
-	sql_1 = 'SELECT menu_id, menu_name, img_id FROM Menu_tb NATURAL JOIN  (SELECT menu_id FROM Review_tb Group by menu_id HAVING COUNT(*)>3 ORDER BY AVG(rating) DESC) as A WHERE category={}'.format(cat)
+	sql_1 = 'SELECT menu_id, menu_name, img_id FROM Menu_tb NATURAL JOIN  (SELECT menu_id, AVG(rating) as avg FROM Review_tb Group by menu_id HAVING COUNT(*)>3) as A WHERE category={} ORDER BY avg DESC'.format(cat)
 
 
 	curs.execute(sql_1)
