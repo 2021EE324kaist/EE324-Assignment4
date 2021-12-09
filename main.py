@@ -129,8 +129,11 @@ def search(m_id = None):
     f_id =  DAO('foodwiki').get_f_id_by_name(data)
     if f_id == None:
     	return render_template('alert.html', msg='No result found')
-    else:
+    elif len(f_id) == 1:
     	return redirect(url_for("get_food", f_id=str(f_id[0])))
+    else:
+    	return render_template('food_list.html', foods=f_id)
+
 
 
 @app.route("/like_click")
@@ -141,7 +144,7 @@ def like():
     	return render_template("alert_link.html", msg="Please login first", link="/login_form")  
     if not DAO('foodwiki').like_up(session['r_id'], session['user_id']):
     	return render_template('alert.html', msg= "You have already evaluated this review!!")
-    return render_template('alert.html', msg="Success!!")
+    return render_template('alert_link.html', msg="Success!!", link="/review/{}".format(session['r_id']))
 
 @app.route("/dislike_click")
 def dislike():
@@ -151,7 +154,7 @@ def dislike():
     	return render_template("alert_link.html", msg="Please login first", link="/login_form")  
     if not DAO('foodwiki').dislike_up(session['r_id'], session['user_id']):
     	return render_template('alert.html', msg= "You have already evaluated this review!!")
-    return render_template('alert.html', msg="Success!!")
+    return render_template('alert_link.html', msg="Success!!", link="/review/{}".format(session['r_id']))
 
 
 	    	

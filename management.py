@@ -84,6 +84,7 @@ def loop():
 				bu.append(i)
 		
 		bad_review(bu)
+		print("ACT")
 		time.sleep(3600)
 
 if __name__ == "__main__":

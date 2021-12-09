@@ -115,9 +115,27 @@ class DAO:
 		sql = '''SELECT menu_id FROM Menu_tb WHERE menu_name=(%s)'''
 		curs.execute(sql, (food_n))
 		res = curs.fetchall()
-		if len(res) == 0:
-			return None
-		return res[0]
+		if len(res) == 0:		
+			ret= None
+			
+		elif len(res) ==1:
+			ret = res[0]
+
+		else:
+			sql_1 = '''SELECT menu_name, menu_id, img FROM Menu_tb NATURAL JOIN Img_tb WHERE menu_name=(%s)'''
+			curs.execute(sql_1, (food_n))
+			res_1 = curs.fetchall()
+			res_ls = []
+			for row in res_1:
+				res_ls.append([row[0], row[1], b64encode(row[2]).decode()])
+			ret = res_ls
+			
+		db.commit()
+		db.close()			
+		return ret
+
+
+			
 
 	def get_food(self, food_id):
 		db = pymysql.connect(host='localhost', user='db_user', db=self.db, charset='utf8')
