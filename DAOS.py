@@ -321,7 +321,7 @@ class DAO:
 		sql_3 = 'Update Review_tb SET bad={} WHERE review_id={}'.format(like_cnt, r_id)
 		curs.execute(sql_3)
 		
-		sql_4 = 'Update User_tb SET dislike_list="{}" WHERE user_id={}'.format(r_ls_2, u_id)
+		sql_4 = 'Update User_tb SET dislike_list="{}" WHERE user_id={}'.format(r_ls, u_id)
 		curs.execute(sql_4)
 		db.commit()
 		db.close()  

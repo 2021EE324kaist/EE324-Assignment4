@@ -1,5 +1,6 @@
 import pymysql
 from base64 import b64encode
+import copy
 cat = ['한식', '중식', '일식', '양식','분식', '할랄푸드', '패스트푸드', '디저트/카페음료', '기타']
 
 def get_table_rows(tb_name):
@@ -74,21 +75,26 @@ def decode_rank(data):
 		if cnt>4:
 			break	
 	
+	tp = copy.deepcopy(img_ls)
+	
 	id_ls = ""
 	id_ls += "img_id={}".format(img_ls[0])
 	del img_ls[0]
 	for i_id in img_ls:
 		id_ls += " OR img_id={}".format(i_id)
 	
-	sql_1 = 'SELECT img FROM Img_tb WHERE ' + id_ls
+	
+	
+	sql_1 = 'SELECT img, img_id FROM Img_tb WHERE ' + id_ls
 	curs.execute(sql_1)
 	res_1 = curs.fetchall()
 	
 	all_rank = []
 	
-	for j in range(len(all_res)):
-		all_rank.append((all_res[j][0], all_res[j][1], b64encode(res_1[j][0]).decode()))
-			
+	for j in range(len(tp)):
+		for i in range(len(all_res)):
+			if int(res_1[i][1]) == int(tp[j]):
+				all_rank.append((all_res[j][0], all_res[j][1], b64encode(res_1[i][0]).decode()))
 	
 	#cat
 	cat_res = []
